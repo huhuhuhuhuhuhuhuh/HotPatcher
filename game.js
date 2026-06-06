@@ -19,16 +19,16 @@ let player = {
     height: 85,
     speed: 4,
     direction: 1,
-    hp: 100,
-    maxHp: 100,
-    mp: 50,
-    maxMp: 50,
-    level: 1,
+    hp: 680,
+    maxHp: 680,
+    mp: 340,
+    maxMp: 340,
+    level: 30,
     exp: 0,
-    expToLevel: 100,
-    gold: 0,
-    attack: 15,
-    defense: 5,
+    expToLevel: 10000,
+    gold: 1000,
+    attack: 160,
+    defense: 63,
     isAttacking: false,
     attackTimer: 0,
     invincible: false,
@@ -71,7 +71,7 @@ function generateMap() {
 
 function spawnEnemies() {
     enemies = [];
-    const count = 6 + Math.floor(Math.random() * 3);
+    const count = 8 + Math.floor(Math.random() * 4);
     for (let i = 0; i < count; i++) {
         let x, y;
         let attempts = 0;
@@ -88,10 +88,11 @@ function spawnEnemies() {
             x: x,
             y: y,
             emoji: types[Math.floor(Math.random() * types.length)],
-            hp: 30 + player.level * 5,
-            maxHp: 30 + player.level * 5,
-            attack: 5 + player.level * 2,
-            moveSpeed: 1 + Math.random()
+            hp: 100 + player.level * 8,
+            maxHp: 100 + player.level * 8,
+            attack: 10 + player.level * 3,
+            moveSpeed: 1.5 + Math.random() * 1.5,
+            attackCooldown: 0
         });
     }
 }
@@ -543,16 +544,21 @@ function updateEnemies() {
         const dy = player.y + player.height/2 - enemy.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
         
-        if (dist < 180 && dist > 40) {
+        if (dist < 250 && dist > 50) {
             enemy.x += (dx / dist) * enemy.moveSpeed;
             enemy.y += (dy / dist) * enemy.moveSpeed;
         }
         
-        if (dist < 50 && !player.invincible) {
-            const damage = Math.max(1, enemy.attack - player.defense/2);
+        if (enemy.attackCooldown > 0) {
+            enemy.attackCooldown--;
+        }
+        
+        if (dist < 60 && !player.invincible && enemy.attackCooldown <= 0) {
+            const damage = Math.max(5, enemy.attack - player.defense/2);
             player.hp -= damage;
             player.invincible = true;
-            player.invincibleTimer = 40;
+            player.invincibleTimer = 30;
+            enemy.attackCooldown = 40;
             createFloatingText(player.x, player.y, '-' + Math.floor(damage), '#FF4444');
             createHitParticles(player.x, player.y, '#FF4444');
             
@@ -751,7 +757,7 @@ document.getElementById('mapBtn').addEventListener('click', () => {
     ];
     
     mapList.innerHTML = maps.map(m => `
-        <div class="map-card ${player.level < m.level ? 'locked' : ''}" data-map="${m.key}">
+        <div class="map-card" data-map="${m.key}">
             <div class="map-info">
                 <span class="map-emoji">${m.emoji}</span>
                 <div>
@@ -762,7 +768,7 @@ document.getElementById('mapBtn').addEventListener('click', () => {
         </div>
     `).join('');
     
-    mapList.querySelectorAll('.map-card:not(.locked)').forEach(card => {
+    mapList.querySelectorAll('.map-card').forEach(card => {
         card.addEventListener('click', () => {
             currentMap = card.dataset.map;
             generateMap();
