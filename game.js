@@ -938,7 +938,6 @@ function updateCooldowns() {
 function gameLoop() {
     updatePlayer();
     updateEnemies();
-    updateParticles();
     checkDeadEnemies();
     checkDropCollection();
     updateCooldowns();
