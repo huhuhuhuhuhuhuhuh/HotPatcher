@@ -173,12 +173,6 @@ class Mech {
     draw() {
         ctx.save();
         
-        if (!this.facingRight) {
-            ctx.translate(this.x + this.width, 0);
-            ctx.scale(-1, 1);
-            this.x = -this.x;
-        }
-
         const px = this.x;
         const py = this.y;
         const c = this.color;
@@ -208,30 +202,38 @@ class Mech {
         ctx.fillRect(px + 40, py + 60, 12, 15);
 
         if (this.isAttacking) {
-            const armOffset = Math.sin(this.attackFrame * 0.5) * 20;
-            ctx.fillStyle = '#ff6600';
-            ctx.fillRect(px + 50, py + 25 + armOffset, 25, 8);
-            ctx.fillStyle = '#ff3300';
-            ctx.fillRect(px + 70, py + 20 + armOffset, 12, 18);
+            const armOffset = Math.sin(this.attackFrame * 0.5) * 10;
+            if (this.facingRight) {
+                ctx.fillStyle = '#ff6600';
+                ctx.fillRect(px + 50, py + 25 + armOffset, 25, 8);
+                ctx.fillStyle = '#ff3300';
+                ctx.fillRect(px + 70, py + 20 + armOffset, 12, 18);
+            } else {
+                ctx.fillStyle = '#ff6600';
+                ctx.fillRect(px - 15, py + 25 + armOffset, 25, 8);
+                ctx.fillStyle = '#ff3300';
+                ctx.fillRect(px - 27, py + 20 + armOffset, 12, 18);
+            }
         }
 
         if (this.isBlocking) {
-            ctx.fillStyle = 'rgba(100, 150, 255, 0.7)';
-            ctx.fillRect(px - 5, py, 15, this.height);
-            ctx.fillStyle = 'rgba(150, 200, 255, 0.5)';
-            ctx.fillRect(px, py, 10, this.height);
+            if (this.facingRight) {
+                ctx.fillStyle = 'rgba(100, 150, 255, 0.7)';
+                ctx.fillRect(px + 55, py, 15, this.height);
+                ctx.fillStyle = 'rgba(150, 200, 255, 0.5)';
+                ctx.fillRect(px + 50, py, 10, this.height);
+            } else {
+                ctx.fillStyle = 'rgba(100, 150, 255, 0.7)';
+                ctx.fillRect(px - 5, py, 15, this.height);
+                ctx.fillStyle = 'rgba(150, 200, 255, 0.5)';
+                ctx.fillRect(px, py, 10, this.height);
+            }
         }
 
         ctx.fillStyle = '#fff';
         const eyeOffset = Math.floor(this.animationFrame) % 2;
         ctx.fillRect(px + 10, py + 10 + eyeOffset, 6, 6);
         ctx.fillRect(px + 44, py + 10 + eyeOffset, 6, 6);
-
-        if (!this.facingRight) {
-            ctx.scale(-1, 1);
-            ctx.translate(-this.x - this.width, 0);
-            this.x = -this.x;
-        }
 
         ctx.restore();
     }
