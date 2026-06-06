@@ -1,73 +1,55 @@
-console.log("Game starting...");
-
+// Canvas setup
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-const CANVAS_WIDTH = 900;
-const CANVAS_HEIGHT = 550;
+const CANVAS_WIDTH = canvas.width;
+const CANVAS_HEIGHT = canvas.height;
 const TILE_SIZE = 40;
-const MAP_WIDTH = 23;
-const MAP_HEIGHT = 14;
+const MAP_WIDTH = 30;
+const MAP_HEIGHT = 20;
 
-// 游戏状态
-let gameMap = [];
-let currentMap = 'huaguo';
-let player = {
-    x: 450,
-    y: 300,
-    width: 65,
-    height: 85,
-    speed: 4,
-    direction: 1,
-    hp: 680,
-    maxHp: 680,
-    mp: 340,
-    maxMp: 340,
-    level: 30,
-    exp: 0,
-    expToLevel: 10000,
-    gold: 1000,
-    attack: 160,
-    defense: 63,
-    isAttacking: false,
-    attackTimer: 0,
-    invincible: false,
-    invincibleTimer: 0,
-    transformed: false,
-    transformTimer: 0,
-    cooldowns: {
-        eye: 0,
-        transform: 0,
-        summon: 0
+// 关卡配置
+const MAP_CONFIG = {
+    huaguo: {
+        name: '花果山',
+        ground: ['#3a6b4a', '#2d5a3a'],
+        wall: '#5a4a3a',
+        wallTop: '#7a6a5a',
+        accent: '#8bc34a',
+        particles: ['🌸', '🍃']
     },
-    animFrame: 0,
-    animTimer: 0,
-    isMoving: false
-};
-
-let enemies = [];
-let particles = [];
-let drops = [];
-let keys = {};
-let cameraX = 0;
-let cameraY = 0;
-
-// 初始化
-function generateMap() {
-    gameMap = [];
-    for (let y = 0; y < MAP_HEIGHT; y++) {
-        gameMap[y] = [];
-        for (let x = 0; x < MAP_WIDTH; x++) {
-            if (y === 0 || y === MAP_HEIGHT - 1 || x === 0 || x === MAP_WIDTH - 1) {
-                gameMap[y][x] = 1;
-            } else if (Math.random() < 0.08) {
-                gameMap[y][x] = 1;
-            } else {
-                gameMap[y][x] = 0;
-            }
-        }
+    qitian: {
+        name: '齐云洞',
+        ground: ['#4a4a6a', '#3a3a5a'],
+        wall: '#6a6a8a',
+        wallTop: '#8a8aaa',
+        accent: '#9a8aca',
+        particles: ['💎', '✨']
+    },
+    huoshan: {
+        name: '火焰山',
+        ground: ['#6a3a2a', '#5a2a1a'],
+        wall: '#8a4a3a',
+        wallTop: '#aa5a4a',
+        accent: '#ff6a3a',
+        particles: ['🔥', '💨']
+    },
+    longgong: {
+        name: '龙宫',
+        ground: ['#2a4a6a', '#1a3a5a'],
+        wall: '#3a5a7a',
+        wallTop: '#4a6a8a',
+        accent: '#4ae0e0',
+        particles: ['🌊', '✨']
+    },
+    tianting: {
+        name: '天庭',
+        ground: ['#5a4a8a', '#4a3a7a'],
+        wall: '#7a6aaa',
+        wallTop: '#9a8aca',
+        accent: '#ffd700',
+        particles: ['☁️', '✨']
     }
-}
+};
 
 // 怪物配置
 const ENEMY_CONFIG = {
@@ -107,6 +89,65 @@ const ENEMY_CONFIG = {
         colors: ['#FFD700', '#FFA500', '#FF8C00']
     }
 };
+
+// Game state
+let gameMap = [];
+let currentMap = 'huaguo';
+let player = {
+    x: 450,
+    y: 300,
+    width: 65,
+    height: 85,
+    speed: 4,
+    direction: 1,
+    hp: 680,
+    maxHp: 680,
+    mp: 340,
+    maxMp: 340,
+    level: 30,
+    exp: 0,
+    expToLevel: 10000,
+    gold: 1000,
+    attack: 160,
+    defense: 63,
+    isAttacking: false,
+    attackTimer: 0,
+    invincible: false,
+    invincibleTimer: 0,
+    transformed: false,
+    transformTimer: 0,
+    cooldowns: {
+        eye: 0,
+        transform: 0,
+        summon: 0
+    },
+    animFrame: 0,
+    animTimer: 0,
+    isMoving: false
+};
+let enemies = [];
+let particles = [];
+let drops = [];
+let keys = {};
+let cameraX = 0;
+let cameraY = 0;
+
+// 初始化
+function generateMap() {
+    gameMap = [];
+    for (let y = 0; y < MAP_HEIGHT; y++) {
+        gameMap[y] = [];
+        for (let x = 0; x < MAP_WIDTH; x++) {
+            if (y === 0 || y === MAP_HEIGHT - 1 || x === 0 || x === MAP_WIDTH - 1) {
+                gameMap[y][x] = 1;
+            } else if (Math.random() < 0.08) {
+                gameMap[y][x] = 1;
+            } else {
+                gameMap[y][x] = 0;
+            }
+        }
+    }
+}
 
 function spawnEnemies() {
     enemies = [];
@@ -154,50 +195,7 @@ function updateUI() {
     document.getElementById('gold').textContent = player.gold;
 }
 
-// 关卡配置
-const MAP_CONFIG = {
-    huaguo: {
-        name: '花果山',
-        ground: ['#3a6b4a', '#2d5a3a'],
-        wall: '#5a4a3a',
-        wallTop: '#7a6a5a',
-        accent: '#8bc34a',
-        particles: ['🌸', '🍃']
-    },
-    qitian: {
-        name: '齐云洞',
-        ground: ['#4a4a6a', '#3a3a5a'],
-        wall: '#6a6a8a',
-        wallTop: '#8a8aaa',
-        accent: '#9a8aca',
-        particles: ['💎', '✨']
-    },
-    huoshan: {
-        name: '火焰山',
-        ground: ['#6a3a2a', '#5a2a1a'],
-        wall: '#8a4a3a',
-        wallTop: '#aa5a4a',
-        accent: '#ff6a3a',
-        particles: ['🔥', '💨']
-    },
-    longgong: {
-        name: '龙宫',
-        ground: ['#2a4a6a', '#1a3a5a'],
-        wall: '#3a5a7a',
-        wallTop: '#4a6a8a',
-        accent: '#4ae0e0',
-        particles: ['🌊', '✨']
-    },
-    tianting: {
-        name: '天庭',
-        ground: ['#5a4a8a', '#4a3a7a'],
-        wall: '#7a6aaa',
-        wallTop: '#9a8aca',
-        accent: '#ffd700',
-        particles: ['☁️', '✨']
-    }
-};
-
+// 绘制函数
 function drawMap() {
     const config = MAP_CONFIG[currentMap] || MAP_CONFIG.huaguo;
     
@@ -256,10 +254,6 @@ function drawPlayer() {
     if (player.invincible && Math.floor(Date.now() / 100) % 2 === 0) {
         ctx.globalAlpha = 0.6;
     }
-    if (player.transformed) {
-        ctx.shadowColor = '#FF8C00';
-        ctx.shadowBlur = 40;
-    }
     
     // 计算动画偏移
     let legOffset = 0;
@@ -281,242 +275,289 @@ function drawPlayer() {
     const scale = player.transformed ? 1.3 : 1.1;
     ctx.scale(scale, scale);
     
-    // ============ 绘制二郎神，带完整动画 ====================
+    // 角色基础位置
+    const baseY = bodyBob;
     
-    // 1. 红色披风（带飘动动画）
-    ctx.fillStyle = '#8B2222';
+    // 发光光环（八九玄功时）
+    if (player.transformed) {
+        const glowSize = 60 + Math.sin(Date.now() * 0.01) * 10;
+        const gradient = ctx.createRadialGradient(32, 45, 0, 32, 45, glowSize);
+        gradient.addColorStop(0, 'rgba(255, 165, 0, 0.6)');
+        gradient.addColorStop(0.5, 'rgba(255, 140, 0, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 69, 0, 0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(32, 45, glowSize, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.shadowColor = '#FF8C00';
+        ctx.shadowBlur = 60;
+    }
+    
+    // 红色披风（带渐变和飘带细节）
+    const capeGradient = ctx.createLinearGradient(20, 10 + baseY, 55, 90 + baseY);
+    capeGradient.addColorStop(0, '#9A1A1A');
+    capeGradient.addColorStop(0.5, '#7A1414');
+    capeGradient.addColorStop(1, '#5A0F0F');
+    ctx.fillStyle = capeGradient;
     ctx.beginPath();
-    ctx.moveTo(22, 15 + bodyBob);
-    ctx.quadraticCurveTo(55 + capeWave, 30 + bodyBob, 52 + capeWave * 0.7, 85);
-    ctx.quadraticCurveTo(47 + capeWave * 0.5, 93, 22, 80);
+    ctx.moveTo(22, 15 + baseY);
+    ctx.quadraticCurveTo(55 + capeWave, 30 + baseY, 52 + capeWave * 0.7, 88);
+    ctx.quadraticCurveTo(47 + capeWave * 0.5, 98, 22, 85);
     ctx.closePath();
     ctx.fill();
     
-    ctx.fillStyle = '#B32424';
+    // 披风内层（深色阴影）
+    ctx.fillStyle = '#6B1010';
     ctx.beginPath();
-    ctx.moveTo(25, 17 + bodyBob);
-    ctx.quadraticCurveTo(52 + capeWave * 0.8, 32 + bodyBob, 49 + capeWave * 0.6, 82);
-    ctx.quadraticCurveTo(44 + capeWave * 0.4, 88, 25, 77);
+    ctx.moveTo(25, 18 + baseY);
+    ctx.quadraticCurveTo(52 + capeWave * 0.8, 34 + baseY, 49 + capeWave * 0.6, 84);
+    ctx.quadraticCurveTo(44 + capeWave * 0.4, 92, 25, 80);
     ctx.closePath();
     ctx.fill();
     
-    // 2. 双腿（带行走动画）
-    ctx.fillStyle = '#2A2020';
-    ctx.fillRect(18, 58 + legOffset, 11, 22 - legOffset);
-    ctx.fillRect(36, 58 - legOffset, 11, 22 + legOffset);
+    // 双腿（带裤子纹理）
+    ctx.fillStyle = '#1A1414';
+    ctx.fillRect(17, 58 + legOffset, 13, 23 - legOffset);
+    ctx.fillRect(35, 58 - legOffset, 13, 23 + legOffset);
     
-    // 3. 靴子
-    ctx.fillStyle = '#4A3A30';
-    ctx.fillRect(15, 76 + legOffset, 16, 8);
-    ctx.fillRect(34, 76 - legOffset, 16, 8);
+    // 靴子（带金属扣装饰）
+    ctx.fillStyle = '#3A2A20';
+    ctx.fillRect(14, 77 + legOffset, 18, 10);
+    ctx.fillRect(33, 77 - legOffset, 18, 10);
     
-    // 4. 身体铠甲（带轻微上下起伏）
-    ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(15, 23 + bodyBob, 35, 38);
+    // 身体铠甲（带层次感和金属光泽）
+    const armorGradient = ctx.createLinearGradient(15, 20 + baseY, 50, 60 + baseY);
+    armorGradient.addColorStop(0, '#FFD700');
+    armorGradient.addColorStop(0.3, '#DAA520');
+    armorGradient.addColorStop(0.6, '#B8860B');
+    armorGradient.addColorStop(1, '#8B7355');
+    ctx.fillStyle = armorGradient;
+    ctx.fillRect(14, 22 + baseY, 37, 39);
     
-    ctx.fillStyle = '#C99E37';
-    ctx.fillRect(18, 26 + bodyBob, 29, 10);
-    ctx.fillRect(18, 44 + bodyBob, 29, 12);
-    
+    // 铠甲装饰
     ctx.fillStyle = '#E6C247';
-    ctx.fillRect(21, 28 + bodyBob, 23, 6);
-    ctx.fillRect(21, 46 + bodyBob, 23, 6);
+    ctx.fillRect(17, 25 + baseY, 31, 9);
+    ctx.fillRect(17, 43 + baseY, 31, 11);
     
-    // 5. 肩膀护肩
-    ctx.fillStyle = '#D4AF37';
+    // 肩膀护肩
+    ctx.fillStyle = '#DAA520';
     ctx.beginPath();
-    ctx.moveTo(12, 22 + bodyBob);
-    ctx.quadraticCurveTo(5, 18 + bodyBob, 10, 32 + bodyBob);
-    ctx.lineTo(15, 35 + bodyBob);
+    ctx.moveTo(10, 21 + baseY);
+    ctx.quadraticCurveTo(3, 16 + baseY, 10, 33 + baseY);
+    ctx.lineTo(16, 36 + baseY);
     ctx.closePath();
     ctx.fill();
     
     ctx.beginPath();
-    ctx.moveTo(53, 22 + bodyBob);
-    ctx.quadraticCurveTo(60, 18 + bodyBob, 55, 32 + bodyBob);
-    ctx.lineTo(50, 35 + bodyBob);
+    ctx.moveTo(54, 21 + baseY);
+    ctx.quadraticCurveTo(61, 16 + baseY, 55, 33 + baseY);
+    ctx.lineTo(48, 36 + baseY);
     ctx.closePath();
     ctx.fill();
     
-    // 6. 手臂
-    ctx.fillStyle = '#2A2020';
-    ctx.fillRect(9, 30 + bodyBob, 8, 18);
-    ctx.fillRect(48, 30 + bodyBob, 8, 18);
+    // 头冠（三山冠，豪华版）
+    const crownGradient = ctx.createLinearGradient(10, 0 + baseY, 54, 20 + baseY);
+    crownGradient.addColorStop(0, '#FFD700');
+    crownGradient.addColorStop(0.5, '#DAA520');
+    crownGradient.addColorStop(1, '#B8860B');
+    ctx.fillStyle = crownGradient;
+    ctx.fillRect(11, 0 + baseY, 43, 21);
     
-    ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(8, 43 + bodyBob, 10, 10);
-    ctx.fillRect(47, 43 + bodyBob, 10, 10);
-    
-    // 7. 头冠（三山冠）
-    ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(12, 0 + bodyBob, 41, 20);
-    
-    ctx.beginPath();
-    ctx.moveTo(32, -8 + bodyBob);
-    ctx.lineTo(21, 3 + bodyBob);
-    ctx.lineTo(43, 3 + bodyBob);
-    ctx.closePath();
-    ctx.fill();
-    
+    // 三山冠山峰
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(32, 4 + bodyBob, 8, 0, Math.PI*2);
+    ctx.moveTo(32, -12 + baseY);
+    ctx.lineTo(18, 2 + baseY);
+    ctx.lineTo(32, 8 + baseY);
+    ctx.lineTo(46, 2 + baseY);
+    ctx.closePath();
     ctx.fill();
     
-    ctx.fillStyle = '#E6C247';
-    ctx.fillRect(15, 2 + bodyBob, 35, 8);
-    ctx.fillRect(18, 12 + bodyBob, 29, 5);
-    
-    // 8. 天眼（发光动画）
-    const eyeGlow = player.transformed ? 0.3 + Math.sin(Date.now() * 0.01) * 0.2 : 0;
-    ctx.fillStyle = player.transformed ? '#FF3333' : '#CC2222';
+    // 中央宝珠（带闪烁效果）
+    const pulseSize = 9 + Math.sin(Date.now() * 0.008) * 2;
+    ctx.fillStyle = '#FF4500';
     ctx.beginPath();
-    ctx.ellipse(32, 7 + bodyBob, 8, 10, 0, 0, Math.PI*2);
+    ctx.arc(32, 3 + baseY, pulseSize, 0, Math.PI*2);
     ctx.fill();
     
-    ctx.fillStyle = '#FFF';
+    // 天眼（超豪华版）
+    const eyeGlow = player.transformed ? 0.5 + Math.sin(Date.now() * 0.015) * 0.3 : 0.2;
+    ctx.fillStyle = `rgba(255, 0, 0, ${eyeGlow})`;
     ctx.beginPath();
-    ctx.arc(32, 9 + bodyBob, 5, 0, Math.PI*2);
+    ctx.arc(32, 7 + baseY, 18, 0, Math.PI*2);
     ctx.fill();
     
-    ctx.fillStyle = '#111';
+    ctx.fillStyle = player.transformed ? '#FF2222' : '#AA1A1A';
     ctx.beginPath();
-    ctx.arc(32, 9 + bodyBob, 2.5, 0, Math.PI*2);
+    ctx.ellipse(32, 7 + baseY, 9, 12, 0, 0, Math.PI*2);
     ctx.fill();
     
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.ellipse(32, 9 + baseY, 6, 7, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(32, 9 + baseY, 3, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 眼睛周围符文（八九玄功时）
     if (player.transformed) {
-        ctx.strokeStyle = '#FF6600';
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 8; i++) {
+            const angle = i * Math.PI/4 + Date.now() * 0.002;
+            ctx.beginPath();
+            ctx.arc(32, 7 + baseY, 15, angle, angle + 0.3);
+            ctx.stroke();
+        }
+    }
+    
+    // 头发
+    ctx.fillStyle = '#2D1A0A';
+    ctx.beginPath();
+    ctx.ellipse(32, 26 + baseY, 15, 13, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 脸（精致版）
+    const faceGradient = ctx.createRadialGradient(32, 30 + baseY, 0, 32, 30 + baseY, 12);
+    faceGradient.addColorStop(0, '#FFE4B5');
+    faceGradient.addColorStop(1, '#DEB887');
+    ctx.fillStyle = faceGradient;
+    ctx.beginPath();
+    ctx.arc(32, 30 + baseY, 12, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 眉毛
+    ctx.strokeStyle = '#2D1A0A';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(20, 27 + baseY);
+    ctx.quadraticCurveTo(24, 25 + baseY, 28, 26 + baseY);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(44, 27 + baseY);
+    ctx.quadraticCurveTo(40, 25 + baseY, 36, 26 + baseY);
+    ctx.stroke();
+    
+    // 眼睛（有眼神！）
+    const blinkFrame = Math.floor(Date.now() / 2000) % 50;
+    if (blinkFrame >= 2) {
+        ctx.fillStyle = '#FFFFFF';
         ctx.beginPath();
-        ctx.arc(32, 9 + bodyBob, 13, 0, Math.PI*2);
-        ctx.stroke();
+        ctx.ellipse(25, 29 + baseY, 4, 3.5, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(39, 29 + baseY, 4, 3.5, 0, 0, Math.PI*2);
+        ctx.fill();
         
-        // 天眼发光效果
-        ctx.fillStyle = `rgba(255, 150, 0, ${eyeGlow})`;
+        ctx.fillStyle = '#1A1A1A';
         ctx.beginPath();
-        ctx.arc(32, 9 + bodyBob, 20, 0, Math.PI*2);
+        ctx.arc(25, 29 + baseY, 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(39, 29 + baseY, 2, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(24, 28 + baseY, 1, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(38, 28 + baseY, 1, 0, Math.PI*2);
         ctx.fill();
     }
     
-    // 9. 头发
-    ctx.fillStyle = '#3D2817';
+    // 鼻子
+    ctx.fillStyle = '#D2B48C';
     ctx.beginPath();
-    ctx.ellipse(32, 26 + bodyBob, 15, 13, 0, 0, Math.PI*2);
+    ctx.moveTo(32, 31 + baseY);
+    ctx.lineTo(30, 35 + baseY);
+    ctx.lineTo(34, 35 + baseY);
+    ctx.closePath();
     ctx.fill();
     
-    // 10. 脸
-    ctx.fillStyle = '#E8C89C';
+    // 胡须
+    ctx.fillStyle = '#2D1A0A';
     ctx.beginPath();
-    ctx.arc(32, 30 + bodyBob, 11, 0, Math.PI*2);
+    ctx.moveTo(32, 36 + baseY);
+    ctx.lineTo(28, 42 + baseY);
+    ctx.lineTo(32, 40 + baseY);
+    ctx.lineTo(36, 42 + baseY);
+    ctx.closePath();
     ctx.fill();
     
-    // 11. 眉毛
-    ctx.strokeStyle = '#3D2817';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(23, 27 + bodyBob);
-    ctx.lineTo(28, 26 + bodyBob);
-    ctx.stroke();
+    // 腰带
+    ctx.fillStyle = '#8B0000';
+    ctx.fillRect(11, 55 + baseY, 43, 7);
     
-    ctx.beginPath();
-    ctx.moveTo(36, 26 + bodyBob);
-    ctx.lineTo(41, 27 + bodyBob);
-    ctx.stroke();
+    ctx.fillStyle = '#DAA520';
+    ctx.fillRect(11, 55 + baseY, 43, 2);
+    ctx.fillRect(11, 60 + baseY, 43, 2);
     
-    // 12. 眼睛（眨眼睛动画）
-    const blinkFrame = Math.floor(Date.now() / 2000) % 50;
-    if (blinkFrame < 3) {
-        ctx.fillStyle = '#E8C89C';
-        ctx.fillRect(22, 26 + bodyBob, 8, 6);
-        ctx.fillRect(34, 26 + bodyBob, 8, 6);
-    } else {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(24, 28 + bodyBob, 4, 4);
-        ctx.fillRect(36, 28 + bodyBob, 4, 4);
-        
-        ctx.fillStyle = '#FFF';
-        ctx.fillRect(24, 28 + bodyBob, 1.5, 1.5);
-        ctx.fillRect(36, 28 + bodyBob, 1.5, 1.5);
-    }
+    ctx.fillStyle = '#FFD700';
+    ctx.fillRect(24, 54 + baseY, 16, 9);
     
-    // 13. 鼻子
-    ctx.fillStyle = '#D8B088';
-    ctx.fillRect(31, 32 + bodyBob, 2.5, 4);
-    
-    // 14. 胡须
-    ctx.fillStyle = '#3D2817';
-    ctx.fillRect(29, 36 + bodyBob, 5, 4);
-    ctx.fillRect(27, 36 + bodyBob, 3, 3);
-    ctx.fillRect(34, 36 + bodyBob, 3, 3);
-    
-    // 15. 腰带
-    ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(12, 56 + bodyBob, 41, 6);
-    
-    ctx.fillStyle = '#CC9900';
-    ctx.beginPath();
-    ctx.arc(32, 59 + bodyBob, 8, 0, Math.PI*2);
-    ctx.fill();
-    
-    // 16. 武器：三尖两刃刀（攻击动画）
+    // 武器：三尖两刃刀（超级精美版）
     ctx.save();
     let weaponAngle = -0.35;
-    let weaponX = 58;
-    let weaponY = 32 + bodyBob;
+    let weaponX = 60;
+    let weaponY = 32 + baseY;
     
     if (player.isAttacking) {
         const attackProgress = player.attackTimer / 25;
-        const swingCurve = Math.sin(attackProgress * Math.PI);
-        weaponAngle = -0.35 - swingCurve * 1.2;
-        weaponX = 56 + Math.cos(attackProgress * Math.PI * 2) * 10;
-        weaponY = 40 + bodyBob + Math.sin(attackProgress * Math.PI * 2) * 8;
+        weaponAngle = -0.35 - Math.sin(attackProgress * Math.PI) * 1.5;
+        weaponX = 58 + Math.cos(attackProgress * Math.PI * 2) * 12;
+        weaponY = 40 + baseY + Math.sin(attackProgress * Math.PI * 2) * 10;
     }
     
     ctx.translate(weaponX, weaponY);
     ctx.rotate(weaponAngle);
     
-    // 刀柄
-    ctx.fillStyle = '#5C3A1D';
-    ctx.fillRect(0, -4, 55, 8);
+    const handleGradient = ctx.createLinearGradient(0, -5, 55, 5);
+    handleGradient.addColorStop(0, '#5D3A1A');
+    handleGradient.addColorStop(0.5, '#8B5A2B');
+    handleGradient.addColorStop(1, '#5D3A1A');
+    ctx.fillStyle = handleGradient;
+    ctx.fillRect(0, -5, 58, 10);
     
-    // 武器装饰
     ctx.fillStyle = '#B8860B';
-    ctx.fillRect(-3, -5, 7, 10);
+    ctx.fillRect(-5, -7, 8, 14);
     
-    // 刀刃
-    ctx.fillStyle = '#C0C0C0';
+    const bladeGradient = ctx.createLinearGradient(50, -15, 80, 15);
+    bladeGradient.addColorStop(0, '#A0A0A0');
+    bladeGradient.addColorStop(0.5, '#E8E8E8');
+    bladeGradient.addColorStop(1, '#A0A0A0');
+    ctx.fillStyle = bladeGradient;
     ctx.beginPath();
-    ctx.moveTo(50, -12);
-    ctx.lineTo(72, 0);
-    ctx.lineTo(50, 12);
-    ctx.lineTo(58, 0);
+    ctx.moveTo(55, -16);
+    ctx.quadraticCurveTo(65, -8, 82, 0);
+    ctx.quadraticCurveTo(65, 8, 55, 16);
+    ctx.quadraticCurveTo(62, 0, 55, -16);
     ctx.closePath();
     ctx.fill();
     
-    ctx.fillStyle = '#D8D8D8';
-    ctx.beginPath();
-    ctx.moveTo(53, -8);
-    ctx.lineTo(67, 0);
-    ctx.lineTo(53, 8);
-    ctx.closePath();
-    ctx.fill();
-    
-    // 攻击特效
     if (player.isAttacking && player.attackTimer > 5 && player.attackTimer < 15) {
-        ctx.fillStyle = `rgba(255, 200, 0, ${(1 - Math.abs(player.attackTimer - 10)/10) * 0.5})`;
+        const effectAlpha = (1 - Math.abs(player.attackTimer - 10) / 10) * 0.8;
+        const slashGradient = ctx.createRadialGradient(80, 0, 0, 80, 0, 40);
+        slashGradient.addColorStop(0, `rgba(255, 215, 0, ${effectAlpha})`);
+        slashGradient.addColorStop(0.5, `rgba(255, 165, 0, ${effectAlpha * 0.6})`);
+        slashGradient.addColorStop(1, `rgba(255, 69, 0, 0)`);
+        ctx.fillStyle = slashGradient;
         ctx.beginPath();
-        ctx.arc(75, 0, 25, 0, Math.PI*2);
+        ctx.arc(80, 0, 40, 0, Math.PI*2);
         ctx.fill();
     }
     
     ctx.restore();
-    
     ctx.restore();
 }
 
 function drawEnemies() {
     for (let enemy of enemies) {
-        // 更新敌人动画
         if (enemy.moveSpeed > 0.1) {
             enemy.animTimer++;
             if (enemy.animTimer > 8) {
@@ -531,15 +572,11 @@ function drawEnemies() {
         ctx.save();
         ctx.translate(screenX, screenY);
         
-        // 怪物动画
         const bobY = Math.sin(enemy.animFrame * 0.5) * 3;
         
-        // 根据关卡绘制不同风格的怪物
         ctx.fillStyle = enemy.color;
         
-        // 根据怪物类型绘制不同形状
         if (enemy.type === '👻') {
-            // 幽灵 - 半透明飘动
             ctx.globalAlpha = 0.7;
             ctx.beginPath();
             ctx.ellipse(0, bobY, 20, 25, 0, 0, Math.PI*2);
@@ -553,7 +590,6 @@ function drawEnemies() {
             ctx.fill();
             ctx.globalAlpha = 1;
         } else if (enemy.type === '🔥') {
-            // 火焰精灵
             const flicker = Math.random() * 5;
             ctx.beginPath();
             ctx.moveTo(0, bobY - 30 - flicker);
@@ -567,27 +603,7 @@ function drawEnemies() {
             ctx.beginPath();
             ctx.ellipse(0, bobY, 12, 18, 0, 0, Math.PI*2);
             ctx.fill();
-        } else if (enemy.type === '🐟') {
-            // 鱼人
-            ctx.beginPath();
-            ctx.ellipse(0, bobY, 22, 15, 0, 0, Math.PI*2);
-            ctx.fill();
-            
-            ctx.beginPath();
-            ctx.moveTo(-22, bobY);
-            ctx.lineTo(-35, bobY - 12);
-            ctx.lineTo(-35, bobY + 12);
-            ctx.closePath();
-            ctx.fill();
-            
-            ctx.beginPath();
-            ctx.moveTo(22, bobY);
-            ctx.lineTo(30, bobY - 15);
-            ctx.lineTo(30, bobY + 15);
-            ctx.closePath();
-            ctx.fill();
         } else if (enemy.type === '👼') {
-            // 天使
             ctx.beginPath();
             ctx.ellipse(0, bobY, 15, 20, 0, 0, Math.PI*2);
             ctx.fill();
@@ -605,12 +621,10 @@ function drawEnemies() {
             ctx.arc(0, bobY - 25, 8, 0, Math.PI*2);
             ctx.fill();
         } else {
-            // 其他怪物 - 绘制为有动画的圆球
             ctx.beginPath();
             ctx.arc(0, bobY, 22, 0, Math.PI*2);
             ctx.fill();
             
-            // 眼睛
             ctx.fillStyle = '#FFFFFF';
             ctx.beginPath();
             ctx.arc(-8, bobY - 5, 6, 0, Math.PI*2);
@@ -624,7 +638,6 @@ function drawEnemies() {
             ctx.fill();
         }
         
-        // 怪物血条
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
         ctx.fillRect(-25, 30, 50, 10);
         ctx.fillStyle = '#FF4444';
@@ -635,6 +648,14 @@ function drawEnemies() {
 }
 
 function drawParticles() {
+    particles = particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.2;
+        p.life -= 0.03;
+        return p.life > 0;
+    });
+    
     for (let p of particles) {
         ctx.globalAlpha = p.life;
         ctx.fillStyle = p.color;
@@ -645,38 +666,44 @@ function drawParticles() {
 
 function drawDrops() {
     for (let drop of drops) {
+        drop.life--;
         const screenX = drop.x - cameraX;
-        const screenY = drop.y - cameraY;
+        const screenY = drop.y - cameraY + Math.sin(Date.now() * 0.005) * 4;
         
         ctx.save();
-        ctx.translate(screenX, screenY + Math.sin(Date.now() * 0.005) * 4);
+        ctx.translate(screenX, screenY);
         ctx.font = '28px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(drop.emoji, 0, 0);
         ctx.restore();
     }
+    
+    drops = drops.filter(d => d.life > 0);
 }
 
 function createHitParticles(x, y, color) {
     for (let i = 0; i < 8; i++) {
         particles.push({
-            x: x, y: y,
-            vx: (Math.random() - 0.5)*8, vy: (Math.random() - 0.5)*8,
-            color: color, life: 1, size: Math.random()*4 + 2
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 8,
+            vy: (Math.random() - 0.5) * 8,
+            color: color,
+            size: 4 + Math.random() * 4,
+            life: 1
         });
     }
 }
 
 function createFloatingText(x, y, text, color) {
-    const container = document.getElementById('floatingTexts');
     const div = document.createElement('div');
     div.className = 'floating-text';
     div.textContent = text;
+    div.style.left = (x - cameraX + CANVAS_WIDTH/2) + 'px';
+    div.style.top = (y - cameraY + CANVAS_HEIGHT/2 - 20) + 'px';
     div.style.color = color;
-    div.style.left = (x - cameraX) + 'px';
-    div.style.top = (y - cameraY) + 'px';
-    container.appendChild(div);
+    document.getElementById('floatingTexts').appendChild(div);
     setTimeout(() => div.remove(), 1000);
 }
 
@@ -709,7 +736,6 @@ function updatePlayer() {
         if (canMoveY) player.y = Math.max(TILE_SIZE, Math.min(MAP_HEIGHT*TILE_SIZE - TILE_SIZE - player.height, newY));
     }
     
-    // 更新动画帧
     if (player.isMoving || player.isAttacking) {
         player.animTimer++;
         if (player.animTimer > 5) {
@@ -776,13 +802,6 @@ function updateEnemies() {
     }
 }
 
-function updateParticles() {
-    particles = particles.filter(p => {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life -= 0.03;
-        return p.life > 0;
-    });
-}
-
 function checkDeadEnemies() {
     for (let i = enemies.length - 1; i >= 0; i--) {
         if (enemies[i].hp <= 0) {
@@ -817,7 +836,6 @@ function checkDeadEnemies() {
 function checkDropCollection() {
     for (let i = drops.length - 1; i >= 0; i--) {
         const drop = drops[i];
-        drop.life--;
         const dist = Math.sqrt((drop.x - player.x - player.width/2) ** 2 + 
                                (drop.y - player.y - player.height/2) ** 2);
         if (dist < 50) {
@@ -827,8 +845,6 @@ function checkDropCollection() {
             }
             drops.splice(i, 1);
             updateUI();
-        } else if (drop.life <= 0) {
-            drops.splice(i, 1);
         }
     }
 }
@@ -844,54 +860,52 @@ function useSkill(skill) {
                 if (dist < 80) {
                     const damage = player.attack * (player.transformed ? 2 : 1);
                     enemy.hp -= damage;
+                    createFloatingText(enemy.x, enemy.y - 20, '-' + Math.floor(damage), '#FFD700');
                     createHitParticles(enemy.x, enemy.y, '#FFD700');
-                    createFloatingText(enemy.x, enemy.y - 20, '-' + damage, '#FFD700');
                 }
             }
             break;
         case 'eye':
-            if (player.cooldowns.eye <= 0 && player.mp >= 10) {
-                player.cooldowns.eye = 180;
-                player.mp -= 10;
-                for (let enemy of enemies) {
-                    const dist = Math.sqrt((enemy.x - player.x - player.width/2) ** 2 + 
-                                           (enemy.y - player.y - player.height/2) ** 2);
-                    if (dist < 200) {
-                        const damage = 30 + player.level * 4;
-                        enemy.hp -= damage;
-                        createHitParticles(enemy.x, enemy.y, '#FF0000');
-                        createFloatingText(enemy.x, enemy.y - 20, '-' + damage, '#FF0000');
-                    }
+            if (player.cooldowns.eye > 0 || player.mp < 20) return;
+            player.cooldowns.eye = 60;
+            player.mp -= 20;
+            for (let enemy of enemies) {
+                const dist = Math.sqrt((enemy.x - player.x - player.width/2) ** 2 + 
+                                       (enemy.y - player.y - player.height/2) ** 2);
+                if (dist < 150) {
+                    const damage = player.attack * 1.5 * (player.transformed ? 2 : 1);
+                    enemy.hp -= damage;
+                    createFloatingText(enemy.x, enemy.y - 20, '-' + Math.floor(damage), '#FF6600');
+                    createHitParticles(enemy.x, enemy.y, '#FF6600');
                 }
-                createFloatingText(player.x, player.y - 20, '天眼!', '#FF0000');
-                updateUI();
             }
+            updateUI();
             break;
         case 'transform':
-            if (player.cooldowns.transform <= 0 && player.mp >= 20) {
-                player.cooldowns.transform = 300;
-                player.mp -= 20;
-                player.transformed = true;
-                player.transformTimer = 180;
-                player.invincible = true;
-                player.invincibleTimer = 180;
-                createFloatingText(player.x, player.y - 30, '八九玄功!', '#FF8C00');
-                updateUI();
-            }
+            if (player.cooldowns.transform > 0 || player.mp < 50) return;
+            player.cooldowns.transform = 240;
+            player.mp -= 50;
+            player.transformed = true;
+            player.transformTimer = 180;
+            player.invincible = true;
+            player.invincibleTimer = 60;
+            updateUI();
             break;
         case 'summon':
-            if (player.cooldowns.summon <= 0 && player.mp >= 25) {
-                player.cooldowns.summon = 180;
-                player.mp -= 25;
-                for (let enemy of enemies) {
-                    const damage = 20 + player.level * 3;
+            if (player.cooldowns.summon > 0 || player.mp < 30) return;
+            player.cooldowns.summon = 120;
+            player.mp -= 30;
+            for (let enemy of enemies) {
+                const dist = Math.sqrt((enemy.x - player.x - player.width/2) ** 2 + 
+                                       (enemy.y - player.y - player.height/2) ** 2);
+                if (dist < 200) {
+                    const damage = player.attack * 0.8 * (player.transformed ? 2 : 1);
                     enemy.hp -= damage;
-                    createHitParticles(enemy.x, enemy.y, '#8B4513');
-                    createFloatingText(enemy.x, enemy.y - 20, '-' + damage, '#8B4513');
+                    createFloatingText(enemy.x, enemy.y - 20, '-' + Math.floor(damage), '#00A0FF');
+                    createHitParticles(enemy.x, enemy.y, '#00A0FF');
                 }
-                createFloatingText(player.x, player.y - 30, '啸天犬!', '#8B4513');
-                updateUI();
             }
+            updateUI();
             break;
     }
 }
@@ -900,11 +914,27 @@ function updateCooldowns() {
     const cd2 = document.getElementById('cd2');
     const cd3 = document.getElementById('cd3');
     const cd4 = document.getElementById('cd4');
-    cd2.style.height = (player.cooldowns.eye / 180 * 100) + '%';
-    cd3.style.height = (player.cooldowns.transform / 300 * 100) + '%';
-    cd4.style.height = (player.cooldowns.summon / 180 * 100) + '%';
+    
+    if (player.cooldowns.eye > 0) {
+        cd2.style.height = (player.cooldowns.eye / 60 * 100) + '%';
+    } else {
+        cd2.style.height = '0%';
+    }
+    
+    if (player.cooldowns.transform > 0) {
+        cd3.style.height = (player.cooldowns.transform / 240 * 100) + '%';
+    } else {
+        cd3.style.height = '0%';
+    }
+    
+    if (player.cooldowns.summon > 0) {
+        cd4.style.height = (player.cooldowns.summon / 120 * 100) + '%';
+    } else {
+        cd4.style.height = '0%';
+    }
 }
 
+// 游戏循环
 function gameLoop() {
     updatePlayer();
     updateEnemies();
