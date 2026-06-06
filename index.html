@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二郎神 · 战神降世</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="game-container">
+        <!-- 游戏标题栏 -->
         <div class="game-header">
             <div class="player-stats">
                 <div class="stat-row">
@@ -30,65 +32,111 @@
                 <span class="title-sub">战神降世</span>
             </div>
             <div class="player-info">
-                <div class="level-badge">等级 <span id="level">1</span></div>
-                <div class="gold-display">💰 <span id="gold">0</span></div>
+                <div class="level-badge">
+                    <span class="badge-icon">⭐</span>
+                    <span id="level">1</span>
+                    <span class="badge-text">级</span>
+                </div>
+                <div class="gold-display">
+                    <span class="gold-icon">💰</span>
+                    <span id="gold">0</span>
+                </div>
             </div>
         </div>
-        
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        
+
+        <!-- 游戏画布 -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="900" height="550"></canvas>
+            <!-- 浮动文字 -->
+            <div id="floatingTexts"></div>
+        </div>
+
+        <!-- 底部UI -->
         <div class="game-footer">
             <div class="location-info">
                 <span class="location-icon">📍</span>
                 <span id="locationName">花果山</span>
+                <button class="map-btn" id="mapBtn">🗺️ 地图</button>
             </div>
             <div class="skills-bar">
                 <div class="skill-slot" id="skill1" title="普通攻击">
                     <span class="skill-key">J</span>
+                    <span class="skill-icon">⚔️</span>
                     <span class="skill-name">攻击</span>
                 </div>
                 <div class="skill-slot" id="skill2" title="天眼">
                     <span class="skill-key">K</span>
+                    <span class="skill-icon">👁️</span>
                     <span class="skill-name">天眼</span>
-                    <span class="skill-mp">10MP</span>
+                    <span class="skill-mp">10</span>
+                    <div class="cooldown-overlay" id="cd2"></div>
                 </div>
                 <div class="skill-slot" id="skill3" title="八九玄功">
                     <span class="skill-key">L</span>
+                    <span class="skill-icon">🌀</span>
                     <span class="skill-name">玄功</span>
-                    <span class="skill-mp">20MP</span>
+                    <span class="skill-mp">20</span>
+                    <div class="cooldown-overlay" id="cd3"></div>
                 </div>
                 <div class="skill-slot" id="skill4" title="哮天犬">
                     <span class="skill-key">空格</span>
-                    <span class="skill-name">啸天犬</span>
-                    <span class="skill-mp">25MP</span>
+                    <span class="skill-icon">🐕</span>
+                    <span class="skill-name">啸天</span>
+                    <span class="skill-mp">25</span>
+                    <div class="cooldown-overlay" id="cd4"></div>
                 </div>
             </div>
             <div class="equip-display">
-                <div class="equip-slot" title="武器">
+                <div class="equip-slot" id="weaponSlot" title="武器">
                     <span id="weaponIcon">⚔️</span>
                 </div>
-                <div class="equip-slot" title="防具">
+                <div class="equip-slot" id="armorSlot" title="防具">
                     <span id="armorIcon">🛡️</span>
                 </div>
-                <div class="equip-slot" title="饰品">
+                <div class="equip-slot" id="accessorySlot" title="饰品">
                     <span id="accessoryIcon">💍</span>
                 </div>
             </div>
         </div>
-        
-        <div class="map-select" id="mapSelect" style="display:none;">
-            <h2>选择地图</h2>
-            <div class="map-list">
-                <button class="map-btn" data-map="huaguo">🌸 花果山 <span class="map-level">Lv.1+</span></button>
-                <button class="map-btn" data-map="qitian">⛰️ 齐云洞 <span class="map-level">Lv.5+</span></button>
-                <button class="map-btn" data-map="nuvo">🔥 火焰山 <span class="map-level">Lv.10+</span></button>
-                <button class="map-btn" data-map="water">🌊 龙宫 <span class="map-level">Lv.15+</span></button>
-                <button class="map-btn" data-map="heaven">☁️ 天庭 <span class="map-level">Lv.20+</span></button>
+
+        <!-- 地图选择弹窗 -->
+        <div class="map-select" id="mapSelect">
+            <div class="map-select-header">
+                <h2>🗺️ 选择地图</h2>
+                <button class="close-btn" id="closeMapBtn">✕</button>
             </div>
-            <button class="close-btn" onclick="closeMapSelect()">关闭</button>
+            <div class="map-list" id="mapList"></div>
+        </div>
+
+        <!-- 操作提示 -->
+        <div class="controls-hint">
+            <div class="hint-item">
+                <span class="key">W A S D</span>
+                <span class="text">移动</span>
+            </div>
+            <div class="hint-item">
+                <span class="key">J</span>
+                <span class="text">攻击</span>
+            </div>
+            <div class="hint-item">
+                <span class="key">K</span>
+                <span class="text">天眼</span>
+            </div>
+            <div class="hint-item">
+                <span class="key">L</span>
+                <span class="text">玄功</span>
+            </div>
+            <div class="hint-item">
+                <span class="key">空格</span>
+                <span class="text">啸天</span>
+            </div>
+            <div class="hint-item">
+                <span class="key">M</span>
+                <span class="text">地图</span>
+            </div>
         </div>
     </div>
-    
+
     <script src="game.js"></script>
 </body>
 </html>
