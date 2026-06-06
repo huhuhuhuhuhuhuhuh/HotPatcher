@@ -15,8 +15,8 @@ let currentMap = 'huaguo';
 let player = {
     x: 450,
     y: 300,
-    width: 50,
-    height: 70,
+    width: 65,
+    height: 85,
     speed: 4,
     direction: 1,
     hp: 100,
@@ -148,7 +148,7 @@ function drawPlayer() {
     }
     if (player.transformed) {
         ctx.shadowColor = '#FF8C00';
-        ctx.shadowBlur = 25;
+        ctx.shadowBlur = 40;
     }
     
     if (player.direction < 0) {
@@ -158,73 +158,209 @@ function drawPlayer() {
         ctx.translate(screenX, screenY);
     }
     
-    if (player.transformed) ctx.scale(1.2, 1.2);
+    const scale = player.transformed ? 1.3 : 1.1;
+    ctx.scale(scale, scale);
     
-    // 绘制二郎神
-    ctx.fillStyle = '#8B0000';
+    // ============ 绘制二郎神，完全按照您给的图片风格 ====================
+    
+    // 1. 红色披风
+    ctx.fillStyle = '#8B2222';
     ctx.beginPath();
-    ctx.moveTo(15, 25);
-    ctx.quadraticCurveTo(40, 30, 35, 65);
-    ctx.quadraticCurveTo(30, 70, 15, 60);
+    ctx.moveTo(22, 15);
+    ctx.quadraticCurveTo(55, 30, 52, 85);
+    ctx.quadraticCurveTo(47, 93, 22, 80);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.fillStyle = '#B32424';
+    ctx.beginPath();
+    ctx.moveTo(25, 17);
+    ctx.quadraticCurveTo(52, 32, 49, 82);
+    ctx.quadraticCurveTo(44, 88, 25, 77);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 2. 双腿
+    ctx.fillStyle = '#2A2020';
+    ctx.fillRect(18, 58, 11, 22);
+    ctx.fillRect(36, 58, 11, 22);
+    
+    // 3. 靴子
+    ctx.fillStyle = '#4A3A30';
+    ctx.fillRect(15, 76, 16, 8);
+    ctx.fillRect(34, 76, 16, 8);
+    
+    // 4. 身体铠甲
+    ctx.fillStyle = '#D4AF37';
+    ctx.fillRect(15, 23, 35, 38);
+    
+    ctx.fillStyle = '#C99E37';
+    ctx.fillRect(18, 26, 29, 10);
+    ctx.fillRect(18, 44, 29, 12);
+    
+    ctx.fillStyle = '#E6C247';
+    ctx.fillRect(21, 28, 23, 6);
+    ctx.fillRect(21, 46, 23, 6);
+    
+    // 5. 肩膀护肩
+    ctx.fillStyle = '#D4AF37';
+    ctx.beginPath();
+    ctx.moveTo(12, 22);
+    ctx.quadraticCurveTo(5, 18, 10, 32);
+    ctx.lineTo(15, 35);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.moveTo(53, 22);
+    ctx.quadraticCurveTo(60, 18, 55, 32);
+    ctx.lineTo(50, 35);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 6. 手臂
+    ctx.fillStyle = '#2A2020';
+    ctx.fillRect(9, 30, 8, 18);
+    ctx.fillRect(48, 30, 8, 18);
+    
+    ctx.fillStyle = '#D4AF37';
+    ctx.fillRect(8, 43, 10, 10);
+    ctx.fillRect(47, 43, 10, 10);
+    
+    // 7. 头冠（三山冠）
+    ctx.fillStyle = '#D4AF37';
+    ctx.fillRect(12, 0, 41, 20);
+    
+    ctx.beginPath();
+    ctx.moveTo(32, -8);
+    ctx.lineTo(21, 3);
+    ctx.lineTo(43, 3);
     ctx.closePath();
     ctx.fill();
     
     ctx.fillStyle = '#FFD700';
-    ctx.fillRect(10, 20, 30, 40);
-    ctx.fillStyle = '#FFA500';
-    ctx.fillRect(13, 25, 24, 6);
-    ctx.fillRect(13, 38, 24, 6);
-    
-    ctx.fillStyle = '#8B6914';
-    ctx.fillRect(8, 8, 34, 15);
-    ctx.fillStyle = '#FFD700';
-    ctx.fillRect(10, 10, 30, 4);
     ctx.beginPath();
-    ctx.arc(25, 5, 5, 0, Math.PI*2);
+    ctx.arc(32, 4, 8, 0, Math.PI*2);
     ctx.fill();
     
-    ctx.fillStyle = player.transformed ? '#FF0000' : '#FF4444';
+    ctx.fillStyle = '#E6C247';
+    ctx.fillRect(15, 2, 35, 8);
+    ctx.fillRect(18, 12, 29, 5);
+    
+    // 8. 天眼
+    ctx.fillStyle = player.transformed ? '#FF3333' : '#CC2222';
     ctx.beginPath();
-    ctx.arc(25, 3, 3, 0, Math.PI*2);
+    ctx.ellipse(32, 7, 8, 10, 0, 0, Math.PI*2);
     ctx.fill();
     
-    ctx.fillStyle = '#F5DEB3';
+    ctx.fillStyle = '#FFF';
     ctx.beginPath();
-    ctx.arc(25, 28, 10, 0, Math.PI*2);
+    ctx.arc(32, 9, 5, 0, Math.PI*2);
     ctx.fill();
     
-    ctx.fillStyle = '#333';
-    ctx.fillRect(20, 26, 3, 3);
-    ctx.fillRect(27, 26, 3, 3);
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(32, 9, 2.5, 0, Math.PI*2);
+    ctx.fill();
     
-    ctx.fillStyle = '#4A3728';
-    ctx.fillRect(12, 58, 8, 12);
-    ctx.fillRect(30, 58, 8, 12);
-    
-    ctx.fillStyle = '#8B7355';
-    if (player.isAttacking) {
-        ctx.save();
-        ctx.translate(40, 30);
-        ctx.rotate(-0.4 + Math.sin(player.attackTimer * 0.3) * 0.6);
-        ctx.fillRect(0, -3, 35, 6);
-        ctx.fillStyle = '#C0C0C0';
+    if (player.transformed) {
+        ctx.strokeStyle = '#FF6600';
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.moveTo(30, -10);
-        ctx.lineTo(45, 0);
-        ctx.lineTo(30, 10);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-    } else {
-        ctx.fillRect(40, 20, 30, 5);
-        ctx.fillStyle = '#C0C0C0';
-        ctx.beginPath();
-        ctx.moveTo(65, 15);
-        ctx.lineTo(75, 22.5);
-        ctx.lineTo(65, 30);
-        ctx.closePath();
-        ctx.fill();
+        ctx.arc(32, 9, 13, 0, Math.PI*2);
+        ctx.stroke();
     }
+    
+    // 9. 头发
+    ctx.fillStyle = '#3D2817';
+    ctx.beginPath();
+    ctx.ellipse(32, 26, 15, 13, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 10. 脸
+    ctx.fillStyle = '#E8C89C';
+    ctx.beginPath();
+    ctx.arc(32, 30, 11, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 11. 眉毛
+    ctx.strokeStyle = '#3D2817';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(23, 27);
+    ctx.lineTo(28, 26);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(36, 26);
+    ctx.lineTo(41, 27);
+    ctx.stroke();
+    
+    // 12. 眼睛
+    ctx.fillStyle = '#111';
+    ctx.fillRect(24, 28, 4, 4);
+    ctx.fillRect(36, 28, 4, 4);
+    
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(24, 28, 1.5, 1.5);
+    ctx.fillRect(36, 28, 1.5, 1.5);
+    
+    // 13. 鼻子
+    ctx.fillStyle = '#D8B088';
+    ctx.fillRect(31, 32, 2.5, 4);
+    
+    // 14. 胡须
+    ctx.fillStyle = '#3D2817';
+    ctx.fillRect(29, 36, 5, 4);
+    ctx.fillRect(27, 36, 3, 3);
+    ctx.fillRect(34, 36, 3, 3);
+    
+    // 15. 腰带
+    ctx.fillStyle = '#D4AF37';
+    ctx.fillRect(12, 56, 41, 6);
+    
+    ctx.fillStyle = '#CC9900';
+    ctx.beginPath();
+    ctx.arc(32, 59, 8, 0, Math.PI*2);
+    ctx.fill();
+    
+    // 16. 武器：三尖两刃刀
+    ctx.save();
+    if (player.isAttacking) {
+        ctx.translate(56, 40);
+        ctx.rotate(-0.6 + Math.sin(player.attackTimer * 0.25) * 0.9);
+    } else {
+        ctx.translate(58, 32);
+        ctx.rotate(-0.35);
+    }
+    
+    // 刀柄
+    ctx.fillStyle = '#5C3A1D';
+    ctx.fillRect(0, -4, 55, 8);
+    
+    // 武器装饰
+    ctx.fillStyle = '#B8860B';
+    ctx.fillRect(-3, -5, 7, 10);
+    
+    // 刀刃
+    ctx.fillStyle = '#C0C0C0';
+    ctx.beginPath();
+    ctx.moveTo(50, -12);
+    ctx.lineTo(72, 0);
+    ctx.lineTo(50, 12);
+    ctx.lineTo(58, 0);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.fillStyle = '#D8D8D8';
+    ctx.beginPath();
+    ctx.moveTo(53, -8);
+    ctx.lineTo(67, 0);
+    ctx.lineTo(53, 8);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
     
     ctx.restore();
 }
