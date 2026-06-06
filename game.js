@@ -69,9 +69,51 @@ function generateMap() {
     }
 }
 
+// 怪物配置
+const ENEMY_CONFIG = {
+    huaguo: {
+        types: ['🐒', '🐺', '🦊', '🐍'],
+        name: '猴妖',
+        baseHp: 150,
+        baseAttack: 15,
+        colors: ['#8B4513', '#A0522D', '#CD853F']
+    },
+    qitian: {
+        types: ['👻', '🦇', '🕷️', '💀'],
+        name: '妖魔',
+        baseHp: 250,
+        baseAttack: 25,
+        colors: ['#4a4a6a', '#6a6a8a', '#8a8aaa']
+    },
+    huoshan: {
+        types: ['🔥', '🌋', '💥', '👹'],
+        name: '火怪',
+        baseHp: 400,
+        baseAttack: 40,
+        colors: ['#8B0000', '#FF4500', '#FF6347']
+    },
+    longgong: {
+        types: ['🐟', '🦈', '🐙', '🧜'],
+        name: '海妖',
+        baseHp: 550,
+        baseAttack: 55,
+        colors: ['#1E90FF', '#4169E1', '#6495ED']
+    },
+    tianting: {
+        types: ['👼', '🔥', '⚔️', '👑'],
+        name: '天神',
+        baseHp: 800,
+        baseAttack: 80,
+        colors: ['#FFD700', '#FFA500', '#FF8C00']
+    }
+};
+
 function spawnEnemies() {
     enemies = [];
+    const config = ENEMY_CONFIG[currentMap] || ENEMY_CONFIG.huaguo;
+    const difficultyMultiplier = {huaguo: 1, qitian: 1.5, huoshan: 2, longgong: 2.5, tianting: 3}[currentMap] || 1;
     const count = 8 + Math.floor(Math.random() * 4);
+    
     for (let i = 0; i < count; i++) {
         let x, y;
         let attempts = 0;
@@ -83,16 +125,22 @@ function spawnEnemies() {
                  gameMap[Math.floor(y/TILE_SIZE)][Math.floor(x/TILE_SIZE)] === 1 && 
                  attempts < 30);
         
-        const types = ['🐒', '🐺', '🦊', '🐍'];
+        const typeIndex = Math.floor(Math.random() * config.types.length);
+        const colorIndex = Math.floor(Math.random() * config.colors.length);
+        
         enemies.push({
             x: x,
             y: y,
-            emoji: types[Math.floor(Math.random() * types.length)],
-            hp: 100 + player.level * 8,
-            maxHp: 100 + player.level * 8,
-            attack: 10 + player.level * 3,
+            type: config.types[typeIndex],
+            name: config.name,
+            color: config.colors[colorIndex],
+            hp: Math.floor(config.baseHp * difficultyMultiplier + player.level * 10),
+            maxHp: Math.floor(config.baseHp * difficultyMultiplier + player.level * 10),
+            attack: Math.floor(config.baseAttack * difficultyMultiplier + player.level * 5),
             moveSpeed: 1.5 + Math.random() * 1.5,
-            attackCooldown: 0
+            attackCooldown: 0,
+            animFrame: 0,
+            animTimer: 0
         });
     }
 }
@@ -106,9 +154,54 @@ function updateUI() {
     document.getElementById('gold').textContent = player.gold;
 }
 
-// 绘制函数
+// 关卡配置
+const MAP_CONFIG = {
+    huaguo: {
+        name: '花果山',
+        ground: ['#3a6b4a', '#2d5a3a'],
+        wall: '#5a4a3a',
+        wallTop: '#7a6a5a',
+        accent: '#8bc34a',
+        particles: ['🌸', '🍃']
+    },
+    qitian: {
+        name: '齐云洞',
+        ground: ['#4a4a6a', '#3a3a5a'],
+        wall: '#6a6a8a',
+        wallTop: '#8a8aaa',
+        accent: '#9a8aca',
+        particles: ['💎', '✨']
+    },
+    huoshan: {
+        name: '火焰山',
+        ground: ['#6a3a2a', '#5a2a1a'],
+        wall: '#8a4a3a',
+        wallTop: '#aa5a4a',
+        accent: '#ff6a3a',
+        particles: ['🔥', '💨']
+    },
+    longgong: {
+        name: '龙宫',
+        ground: ['#2a4a6a', '#1a3a5a'],
+        wall: '#3a5a7a',
+        wallTop: '#4a6a8a',
+        accent: '#4ae0e0',
+        particles: ['🌊', '✨']
+    },
+    tianting: {
+        name: '天庭',
+        ground: ['#5a4a8a', '#4a3a7a'],
+        wall: '#7a6aaa',
+        wallTop: '#9a8aca',
+        accent: '#ffd700',
+        particles: ['☁️', '✨']
+    }
+};
+
 function drawMap() {
-    ctx.fillStyle = '#1a3a2a';
+    const config = MAP_CONFIG[currentMap] || MAP_CONFIG.huaguo;
+    
+    ctx.fillStyle = config.ground[0];
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
     cameraX = player.x - CANVAS_WIDTH/2 + player.width/2;
@@ -129,13 +222,26 @@ function drawMap() {
             const tile = gameMap[y][x];
             
             if (tile === 0) {
-                ctx.fillStyle = (x + y) % 2 === 0 ? '#2a5a3a' : '#254a35';
+                ctx.fillStyle = (x + y) % 2 === 0 ? config.ground[0] : config.ground[1];
                 ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+                
+                if (Math.random() < 0.02) {
+                    const particle = config.particles[Math.floor(Math.random() * config.particles.length)];
+                    ctx.font = '16px Arial';
+                    ctx.fillText(particle, screenX + Math.random() * 30, screenY + Math.random() * 30);
+                }
             } else {
-                ctx.fillStyle = '#3a3a5a';
+                ctx.fillStyle = config.wall;
                 ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
-                ctx.fillStyle = '#5a5a7a';
+                ctx.fillStyle = config.wallTop;
                 ctx.fillRect(screenX + 4, screenY + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                
+                if (currentMap === 'huoshan' && Math.random() < 0.1) {
+                    ctx.fillStyle = 'rgba(255, 100, 50, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(screenX + TILE_SIZE/2, screenY + TILE_SIZE/2, 8, 0, Math.PI*2);
+                    ctx.fill();
+                }
             }
         }
     }
@@ -410,21 +516,119 @@ function drawPlayer() {
 
 function drawEnemies() {
     for (let enemy of enemies) {
+        // 更新敌人动画
+        if (enemy.moveSpeed > 0.1) {
+            enemy.animTimer++;
+            if (enemy.animTimer > 8) {
+                enemy.animTimer = 0;
+                enemy.animFrame = (enemy.animFrame + 1) % 4;
+            }
+        }
+        
         const screenX = enemy.x - cameraX;
         const screenY = enemy.y - cameraY;
         
         ctx.save();
         ctx.translate(screenX, screenY);
         
-        ctx.font = '36px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(enemy.emoji, 0, 0);
+        // 怪物动画
+        const bobY = Math.sin(enemy.animFrame * 0.5) * 3;
         
-        ctx.fillStyle = 'rgba(0,0,0,0.6)';
-        ctx.fillRect(-25, 25, 50, 8);
+        // 根据关卡绘制不同风格的怪物
+        ctx.fillStyle = enemy.color;
+        
+        // 根据怪物类型绘制不同形状
+        if (enemy.type === '👻') {
+            // 幽灵 - 半透明飘动
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            ctx.ellipse(0, bobY, 20, 25, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(-20, bobY);
+            ctx.quadraticCurveTo(-15, bobY + 20, -10, bobY + 15);
+            ctx.quadraticCurveTo(-5, bobY + 25, 0, bobY + 15);
+            ctx.quadraticCurveTo(5, bobY + 25, 10, bobY + 15);
+            ctx.quadraticCurveTo(15, bobY + 20, 20, bobY);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        } else if (enemy.type === '🔥') {
+            // 火焰精灵
+            const flicker = Math.random() * 5;
+            ctx.beginPath();
+            ctx.moveTo(0, bobY - 30 - flicker);
+            ctx.quadraticCurveTo(25, bobY - 10, 20, bobY + 15);
+            ctx.quadraticCurveTo(10, bobY + 25, 0, bobY + 20);
+            ctx.quadraticCurveTo(-10, bobY + 25, -20, bobY + 15);
+            ctx.quadraticCurveTo(-25, bobY - 10, 0, bobY - 30 - flicker);
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.ellipse(0, bobY, 12, 18, 0, 0, Math.PI*2);
+            ctx.fill();
+        } else if (enemy.type === '🐟') {
+            // 鱼人
+            ctx.beginPath();
+            ctx.ellipse(0, bobY, 22, 15, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(-22, bobY);
+            ctx.lineTo(-35, bobY - 12);
+            ctx.lineTo(-35, bobY + 12);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.moveTo(22, bobY);
+            ctx.lineTo(30, bobY - 15);
+            ctx.lineTo(30, bobY + 15);
+            ctx.closePath();
+            ctx.fill();
+        } else if (enemy.type === '👼') {
+            // 天使
+            ctx.beginPath();
+            ctx.ellipse(0, bobY, 15, 20, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.ellipse(-18, bobY - 5, 15, 8, -0.3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(18, bobY - 5, 15, 8, 0.3, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = enemy.color;
+            ctx.beginPath();
+            ctx.arc(0, bobY - 25, 8, 0, Math.PI*2);
+            ctx.fill();
+        } else {
+            // 其他怪物 - 绘制为有动画的圆球
+            ctx.beginPath();
+            ctx.arc(0, bobY, 22, 0, Math.PI*2);
+            ctx.fill();
+            
+            // 眼睛
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(-8, bobY - 5, 6, 0, Math.PI*2);
+            ctx.arc(8, bobY - 5, 6, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.arc(-8, bobY - 5, 3, 0, Math.PI*2);
+            ctx.arc(8, bobY - 5, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        // 怪物血条
+        ctx.fillStyle = 'rgba(0,0,0,0.7)';
+        ctx.fillRect(-25, 30, 50, 10);
         ctx.fillStyle = '#FF4444';
-        ctx.fillRect(-25, 25, 50 * (enemy.hp / enemy.maxHp), 8);
+        ctx.fillRect(-25, 30, 50 * (enemy.hp / enemy.maxHp), 10);
         
         ctx.restore();
     }
