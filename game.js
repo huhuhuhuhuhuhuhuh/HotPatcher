@@ -39,7 +39,10 @@ let player = {
         eye: 0,
         transform: 0,
         summon: 0
-    }
+    },
+    animFrame: 0,
+    animTimer: 0,
+    isMoving: false
 };
 
 let enemies = [];
@@ -151,6 +154,16 @@ function drawPlayer() {
         ctx.shadowBlur = 40;
     }
     
+    // 计算动画偏移
+    let legOffset = 0;
+    let bodyBob = 0;
+    let capeWave = 0;
+    if (player.isMoving) {
+        legOffset = Math.sin(player.animFrame * 0.8) * 5;
+        bodyBob = Math.abs(Math.sin(player.animFrame * 0.8)) * 2;
+        capeWave = Math.sin(player.animFrame * 0.6 + Date.now() * 0.01) * 3;
+    }
+    
     if (player.direction < 0) {
         ctx.translate(screenX + player.width, screenY);
         ctx.scale(-1, 1);
@@ -161,178 +174,199 @@ function drawPlayer() {
     const scale = player.transformed ? 1.3 : 1.1;
     ctx.scale(scale, scale);
     
-    // ============ 绘制二郎神，完全按照您给的图片风格 ====================
+    // ============ 绘制二郎神，带完整动画 ====================
     
-    // 1. 红色披风
+    // 1. 红色披风（带飘动动画）
     ctx.fillStyle = '#8B2222';
     ctx.beginPath();
-    ctx.moveTo(22, 15);
-    ctx.quadraticCurveTo(55, 30, 52, 85);
-    ctx.quadraticCurveTo(47, 93, 22, 80);
+    ctx.moveTo(22, 15 + bodyBob);
+    ctx.quadraticCurveTo(55 + capeWave, 30 + bodyBob, 52 + capeWave * 0.7, 85);
+    ctx.quadraticCurveTo(47 + capeWave * 0.5, 93, 22, 80);
     ctx.closePath();
     ctx.fill();
     
     ctx.fillStyle = '#B32424';
     ctx.beginPath();
-    ctx.moveTo(25, 17);
-    ctx.quadraticCurveTo(52, 32, 49, 82);
-    ctx.quadraticCurveTo(44, 88, 25, 77);
+    ctx.moveTo(25, 17 + bodyBob);
+    ctx.quadraticCurveTo(52 + capeWave * 0.8, 32 + bodyBob, 49 + capeWave * 0.6, 82);
+    ctx.quadraticCurveTo(44 + capeWave * 0.4, 88, 25, 77);
     ctx.closePath();
     ctx.fill();
     
-    // 2. 双腿
+    // 2. 双腿（带行走动画）
     ctx.fillStyle = '#2A2020';
-    ctx.fillRect(18, 58, 11, 22);
-    ctx.fillRect(36, 58, 11, 22);
+    ctx.fillRect(18, 58 + legOffset, 11, 22 - legOffset);
+    ctx.fillRect(36, 58 - legOffset, 11, 22 + legOffset);
     
     // 3. 靴子
     ctx.fillStyle = '#4A3A30';
-    ctx.fillRect(15, 76, 16, 8);
-    ctx.fillRect(34, 76, 16, 8);
+    ctx.fillRect(15, 76 + legOffset, 16, 8);
+    ctx.fillRect(34, 76 - legOffset, 16, 8);
     
-    // 4. 身体铠甲
+    // 4. 身体铠甲（带轻微上下起伏）
     ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(15, 23, 35, 38);
+    ctx.fillRect(15, 23 + bodyBob, 35, 38);
     
     ctx.fillStyle = '#C99E37';
-    ctx.fillRect(18, 26, 29, 10);
-    ctx.fillRect(18, 44, 29, 12);
+    ctx.fillRect(18, 26 + bodyBob, 29, 10);
+    ctx.fillRect(18, 44 + bodyBob, 29, 12);
     
     ctx.fillStyle = '#E6C247';
-    ctx.fillRect(21, 28, 23, 6);
-    ctx.fillRect(21, 46, 23, 6);
+    ctx.fillRect(21, 28 + bodyBob, 23, 6);
+    ctx.fillRect(21, 46 + bodyBob, 23, 6);
     
     // 5. 肩膀护肩
     ctx.fillStyle = '#D4AF37';
     ctx.beginPath();
-    ctx.moveTo(12, 22);
-    ctx.quadraticCurveTo(5, 18, 10, 32);
-    ctx.lineTo(15, 35);
+    ctx.moveTo(12, 22 + bodyBob);
+    ctx.quadraticCurveTo(5, 18 + bodyBob, 10, 32 + bodyBob);
+    ctx.lineTo(15, 35 + bodyBob);
     ctx.closePath();
     ctx.fill();
     
     ctx.beginPath();
-    ctx.moveTo(53, 22);
-    ctx.quadraticCurveTo(60, 18, 55, 32);
-    ctx.lineTo(50, 35);
+    ctx.moveTo(53, 22 + bodyBob);
+    ctx.quadraticCurveTo(60, 18 + bodyBob, 55, 32 + bodyBob);
+    ctx.lineTo(50, 35 + bodyBob);
     ctx.closePath();
     ctx.fill();
     
     // 6. 手臂
     ctx.fillStyle = '#2A2020';
-    ctx.fillRect(9, 30, 8, 18);
-    ctx.fillRect(48, 30, 8, 18);
+    ctx.fillRect(9, 30 + bodyBob, 8, 18);
+    ctx.fillRect(48, 30 + bodyBob, 8, 18);
     
     ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(8, 43, 10, 10);
-    ctx.fillRect(47, 43, 10, 10);
+    ctx.fillRect(8, 43 + bodyBob, 10, 10);
+    ctx.fillRect(47, 43 + bodyBob, 10, 10);
     
     // 7. 头冠（三山冠）
     ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(12, 0, 41, 20);
+    ctx.fillRect(12, 0 + bodyBob, 41, 20);
     
     ctx.beginPath();
-    ctx.moveTo(32, -8);
-    ctx.lineTo(21, 3);
-    ctx.lineTo(43, 3);
+    ctx.moveTo(32, -8 + bodyBob);
+    ctx.lineTo(21, 3 + bodyBob);
+    ctx.lineTo(43, 3 + bodyBob);
     ctx.closePath();
     ctx.fill();
     
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
-    ctx.arc(32, 4, 8, 0, Math.PI*2);
+    ctx.arc(32, 4 + bodyBob, 8, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#E6C247';
-    ctx.fillRect(15, 2, 35, 8);
-    ctx.fillRect(18, 12, 29, 5);
+    ctx.fillRect(15, 2 + bodyBob, 35, 8);
+    ctx.fillRect(18, 12 + bodyBob, 29, 5);
     
-    // 8. 天眼
+    // 8. 天眼（发光动画）
+    const eyeGlow = player.transformed ? 0.3 + Math.sin(Date.now() * 0.01) * 0.2 : 0;
     ctx.fillStyle = player.transformed ? '#FF3333' : '#CC2222';
     ctx.beginPath();
-    ctx.ellipse(32, 7, 8, 10, 0, 0, Math.PI*2);
+    ctx.ellipse(32, 7 + bodyBob, 8, 10, 0, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#FFF';
     ctx.beginPath();
-    ctx.arc(32, 9, 5, 0, Math.PI*2);
+    ctx.arc(32, 9 + bodyBob, 5, 0, Math.PI*2);
     ctx.fill();
     
     ctx.fillStyle = '#111';
     ctx.beginPath();
-    ctx.arc(32, 9, 2.5, 0, Math.PI*2);
+    ctx.arc(32, 9 + bodyBob, 2.5, 0, Math.PI*2);
     ctx.fill();
     
     if (player.transformed) {
         ctx.strokeStyle = '#FF6600';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
-        ctx.arc(32, 9, 13, 0, Math.PI*2);
+        ctx.arc(32, 9 + bodyBob, 13, 0, Math.PI*2);
         ctx.stroke();
+        
+        // 天眼发光效果
+        ctx.fillStyle = `rgba(255, 150, 0, ${eyeGlow})`;
+        ctx.beginPath();
+        ctx.arc(32, 9 + bodyBob, 20, 0, Math.PI*2);
+        ctx.fill();
     }
     
     // 9. 头发
     ctx.fillStyle = '#3D2817';
     ctx.beginPath();
-    ctx.ellipse(32, 26, 15, 13, 0, 0, Math.PI*2);
+    ctx.ellipse(32, 26 + bodyBob, 15, 13, 0, 0, Math.PI*2);
     ctx.fill();
     
     // 10. 脸
     ctx.fillStyle = '#E8C89C';
     ctx.beginPath();
-    ctx.arc(32, 30, 11, 0, Math.PI*2);
+    ctx.arc(32, 30 + bodyBob, 11, 0, Math.PI*2);
     ctx.fill();
     
     // 11. 眉毛
     ctx.strokeStyle = '#3D2817';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.moveTo(23, 27);
-    ctx.lineTo(28, 26);
+    ctx.moveTo(23, 27 + bodyBob);
+    ctx.lineTo(28, 26 + bodyBob);
     ctx.stroke();
     
     ctx.beginPath();
-    ctx.moveTo(36, 26);
-    ctx.lineTo(41, 27);
+    ctx.moveTo(36, 26 + bodyBob);
+    ctx.lineTo(41, 27 + bodyBob);
     ctx.stroke();
     
-    // 12. 眼睛
-    ctx.fillStyle = '#111';
-    ctx.fillRect(24, 28, 4, 4);
-    ctx.fillRect(36, 28, 4, 4);
-    
-    ctx.fillStyle = '#FFF';
-    ctx.fillRect(24, 28, 1.5, 1.5);
-    ctx.fillRect(36, 28, 1.5, 1.5);
+    // 12. 眼睛（眨眼睛动画）
+    const blinkFrame = Math.floor(Date.now() / 2000) % 50;
+    if (blinkFrame < 3) {
+        ctx.fillStyle = '#E8C89C';
+        ctx.fillRect(22, 26 + bodyBob, 8, 6);
+        ctx.fillRect(34, 26 + bodyBob, 8, 6);
+    } else {
+        ctx.fillStyle = '#111';
+        ctx.fillRect(24, 28 + bodyBob, 4, 4);
+        ctx.fillRect(36, 28 + bodyBob, 4, 4);
+        
+        ctx.fillStyle = '#FFF';
+        ctx.fillRect(24, 28 + bodyBob, 1.5, 1.5);
+        ctx.fillRect(36, 28 + bodyBob, 1.5, 1.5);
+    }
     
     // 13. 鼻子
     ctx.fillStyle = '#D8B088';
-    ctx.fillRect(31, 32, 2.5, 4);
+    ctx.fillRect(31, 32 + bodyBob, 2.5, 4);
     
     // 14. 胡须
     ctx.fillStyle = '#3D2817';
-    ctx.fillRect(29, 36, 5, 4);
-    ctx.fillRect(27, 36, 3, 3);
-    ctx.fillRect(34, 36, 3, 3);
+    ctx.fillRect(29, 36 + bodyBob, 5, 4);
+    ctx.fillRect(27, 36 + bodyBob, 3, 3);
+    ctx.fillRect(34, 36 + bodyBob, 3, 3);
     
     // 15. 腰带
     ctx.fillStyle = '#D4AF37';
-    ctx.fillRect(12, 56, 41, 6);
+    ctx.fillRect(12, 56 + bodyBob, 41, 6);
     
     ctx.fillStyle = '#CC9900';
     ctx.beginPath();
-    ctx.arc(32, 59, 8, 0, Math.PI*2);
+    ctx.arc(32, 59 + bodyBob, 8, 0, Math.PI*2);
     ctx.fill();
     
-    // 16. 武器：三尖两刃刀
+    // 16. 武器：三尖两刃刀（攻击动画）
     ctx.save();
+    let weaponAngle = -0.35;
+    let weaponX = 58;
+    let weaponY = 32 + bodyBob;
+    
     if (player.isAttacking) {
-        ctx.translate(56, 40);
-        ctx.rotate(-0.6 + Math.sin(player.attackTimer * 0.25) * 0.9);
-    } else {
-        ctx.translate(58, 32);
-        ctx.rotate(-0.35);
+        const attackProgress = player.attackTimer / 25;
+        const swingCurve = Math.sin(attackProgress * Math.PI);
+        weaponAngle = -0.35 - swingCurve * 1.2;
+        weaponX = 56 + Math.cos(attackProgress * Math.PI * 2) * 10;
+        weaponY = 40 + bodyBob + Math.sin(attackProgress * Math.PI * 2) * 8;
     }
+    
+    ctx.translate(weaponX, weaponY);
+    ctx.rotate(weaponAngle);
     
     // 刀柄
     ctx.fillStyle = '#5C3A1D';
@@ -359,6 +393,14 @@ function drawPlayer() {
     ctx.lineTo(53, 8);
     ctx.closePath();
     ctx.fill();
+    
+    // 攻击特效
+    if (player.isAttacking && player.attackTimer > 5 && player.attackTimer < 15) {
+        ctx.fillStyle = `rgba(255, 200, 0, ${(1 - Math.abs(player.attackTimer - 10)/10) * 0.5})`;
+        ctx.beginPath();
+        ctx.arc(75, 0, 25, 0, Math.PI*2);
+        ctx.fill();
+    }
     
     ctx.restore();
     
@@ -441,6 +483,8 @@ function updatePlayer() {
     if (keys['KeyW'] || keys['ArrowUp']) dy = -1;
     if (keys['KeyS'] || keys['ArrowDown']) dy = 1;
     
+    player.isMoving = (dx !== 0 || dy !== 0);
+    
     if (dx !== 0 || dy !== 0) {
         const len = Math.sqrt(dx*dx + dy*dy);
         dx /= len; dy /= len;
@@ -460,9 +504,18 @@ function updatePlayer() {
         if (canMoveY) player.y = Math.max(TILE_SIZE, Math.min(MAP_HEIGHT*TILE_SIZE - TILE_SIZE - player.height, newY));
     }
     
+    // 更新动画帧
+    if (player.isMoving || player.isAttacking) {
+        player.animTimer++;
+        if (player.animTimer > 5) {
+            player.animTimer = 0;
+            player.animFrame = (player.animFrame + 1) % 8;
+        }
+    }
+    
     if (player.isAttacking) {
         player.attackTimer++;
-        if (player.attackTimer > 20) {
+        if (player.attackTimer > 25) {
             player.isAttacking = false;
             player.attackTimer = 0;
         }
