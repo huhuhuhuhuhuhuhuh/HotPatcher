@@ -31,13 +31,13 @@ body {
 .game-header {
     display: flex;
     justify-content: space-between;
-    width: 800px;
+    width: 900px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.5);
-    border: 4px solid #333;
+    border: 4px solid #c9a227;
     border-radius: 8px;
     box-shadow: 
-        inset 0 0 20px rgba(255, 0, 0, 0.1),
+        inset 0 0 20px rgba(201, 162, 39, 0.2),
         0 0 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -50,15 +50,12 @@ body {
 
 .player-name {
     font-size: 12px;
-    color: #fff;
-    text-shadow: 2px 2px 0 #000;
+    color: #ffcc00;
+    text-shadow: 2px 2px 0 #8b6914;
 }
 
-.player1 .player-name { color: #ff4444; }
-.player2 .player-name { color: #4444ff; }
-
 .health-bar {
-    width: 150px;
+    width: 200px;
     height: 20px;
     background: #222;
     border: 3px solid #444;
@@ -69,17 +66,9 @@ body {
 
 .health-fill {
     height: 100%;
+    background: linear-gradient(90deg, #ff6600, #ffcc00);
+    box-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
     transition: width 0.3s ease;
-}
-
-.player1 .health-fill {
-    background: linear-gradient(90deg, #ff3333, #ff6666);
-    box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
-}
-
-.player2 .health-fill {
-    background: linear-gradient(90deg, #3333ff, #6666ff);
-    box-shadow: 0 0 10px rgba(51, 51, 255, 0.5);
 }
 
 .health-text {
@@ -87,18 +76,36 @@ body {
     color: #fff;
 }
 
-.game-title {
-    font-family: 'Press Start 2P', monospace;
+.level-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.level-label {
+    font-size: 10px;
+    color: #aaa;
+}
+
+.level-value {
     font-size: 24px;
     color: #ffcc00;
+    text-shadow: 2px 2px 0 #8b6914;
+}
+
+.game-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 20px;
+    color: #ffcc00;
     text-shadow: 
-        4px 4px 0 #ff6600,
+        4px 4px 0 #8b6914,
         2px 2px 0 #ffaa00;
-    letter-spacing: 4px;
+    letter-spacing: 2px;
 }
 
 #gameCanvas {
-    border: 4px solid #444;
+    border: 4px solid #c9a227;
     border-radius: 8px;
     box-shadow: 
         0 0 30px rgba(0, 0, 0, 0.8),
@@ -109,10 +116,10 @@ body {
 .game-footer {
     display: flex;
     justify-content: space-between;
-    width: 800px;
+    width: 900px;
     padding: 15px;
     background: rgba(0, 0, 0, 0.5);
-    border: 4px solid #333;
+    border: 4px solid #c9a227;
     border-radius: 8px;
 }
 
@@ -124,7 +131,7 @@ body {
 
 .controls h3 {
     font-size: 12px;
-    color: #fff;
+    color: #ffcc00;
     margin-bottom: 5px;
 }
 
@@ -133,44 +140,83 @@ body {
     color: #aaa;
 }
 
-.player1-controls h3 { color: #ff4444; }
-.player2-controls h3 { color: #4444ff; }
-
 .game-status {
     font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
+    font-size: 14px;
     color: #ffcc00;
-    text-shadow: 2px 2px 0 #ff6600;
+    text-shadow: 2px 2px 0 #8b6914;
     text-align: center;
+    max-width: 300px;
 }
 
-.restart-btn {
+.skills {
+    display: flex;
+    gap: 20px;
+}
+
+.skill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+    background: rgba(201, 162, 39, 0.1);
+    border: 2px solid #c9a227;
+    border-radius: 8px;
+    min-width: 80px;
+}
+
+.skill-icon {
+    font-size: 24px;
+}
+
+.skill-name {
+    font-size: 8px;
+    color: #ffcc00;
+}
+
+.skill-cooldown {
+    font-size: 12px;
+    color: #ff4444;
+    font-weight: bold;
+}
+
+.restart-btn, .next-level-btn {
     font-family: 'Press Start 2P', monospace;
     font-size: 12px;
     padding: 15px 30px;
     background: linear-gradient(180deg, #444 0%, #222 100%);
     color: #ffcc00;
-    border: 4px solid #ffcc00;
+    border: 4px solid #c9a227;
     border-radius: 8px;
     cursor: pointer;
-    text-shadow: 2px 2px 0 #ff6600;
+    text-shadow: 2px 2px 0 #8b6914;
     box-shadow: 
-        0 4px 0 #ff6600,
+        0 4px 0 #8b6914,
         0 6px 10px rgba(0, 0, 0, 0.5);
     transition: all 0.1s ease;
     display: none;
 }
 
-.restart-btn:hover {
+.restart-btn:hover, .next-level-btn:hover {
     transform: translateY(2px);
     box-shadow: 
-        0 2px 0 #ff6600,
+        0 2px 0 #8b6914,
         0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.restart-btn:active {
+.restart-btn:active, .next-level-btn:active {
     transform: translateY(4px);
     box-shadow: none;
+}
+
+.next-level-btn {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
 }
 
 @keyframes pulse {

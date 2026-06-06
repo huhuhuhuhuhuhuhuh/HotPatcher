@@ -3,48 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>像素风机甲对战</title>
+    <title>二郎神闯关传</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <div class="game-header">
-            <div class="player-info player1">
-                <span class="player-name">机甲战士-红</span>
+            <div class="player-info">
+                <span class="player-name">二郎神 · 杨戬</span>
                 <div class="health-bar">
-                    <div class="health-fill" id="health1"></div>
+                    <div class="health-fill" id="health"></div>
                 </div>
-                <span class="health-text" id="healthText1">100/100</span>
+                <span class="health-text" id="healthText">100/100</span>
             </div>
-            <div class="game-title">MECHA ARENA</div>
-            <div class="player-info player2">
-                <span class="player-name">机甲战士-蓝</span>
-                <div class="health-bar">
-                    <div class="health-fill" id="health2"></div>
-                </div>
-                <span class="health-text" id="healthText2">100/100</span>
+            <div class="game-title">二郎神闯关传</div>
+            <div class="level-info">
+                <span class="level-label">关卡</span>
+                <span class="level-value" id="level">1</span>
             </div>
         </div>
         
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <canvas id="gameCanvas" width="900" height="500"></canvas>
         
         <div class="game-footer">
-            <div class="controls player1-controls">
-                <h3>玩家 1 (红)</h3>
-                <p>↑↓←→ 移动</p>
-                <p>J 攻击</p>
-                <p>K 防御</p>
+            <div class="controls">
+                <h3>操作说明</h3>
+                <p>← → 移动</p>
+                <p>↑ 跳跃 / 腾云</p>
+                <p>J 三尖两刃刀</p>
+                <p>K 天眼</p>
+                <p>L 八九玄功</p>
+                <p>空格 召唤啸天犬</p>
             </div>
             <div class="game-status" id="gameStatus">准备战斗!</div>
-            <div class="controls player2-controls">
-                <h3>玩家 2 (蓝)</h3>
-                <p>WASD 移动</p>
-                <p>F 攻击</p>
-                <p>G 防御</p>
+            <div class="skills">
+                <div class="skill" id="skillEye">
+                    <span class="skill-icon">👁️</span>
+                    <span class="skill-name">天眼</span>
+                    <span class="skill-cooldown" id="cooldownEye">0</span>
+                </div>
+                <div class="skill" id="skillTransform">
+                    <span class="skill-icon">🐉</span>
+                    <span class="skill-name">八九玄功</span>
+                    <span class="skill-cooldown" id="cooldownTransform">0</span>
+                </div>
+                <div class="skill" id="skillDog">
+                    <span class="skill-icon">🐕</span>
+                    <span class="skill-name">啸天犬</span>
+                    <span class="skill-cooldown" id="cooldownDog">0</span>
+                </div>
             </div>
         </div>
         
         <button id="restartBtn" class="restart-btn">重新开始</button>
+        <button id="nextLevelBtn" class="next-level-btn">下一关</button>
     </div>
     
     <script src="game.js"></script>
