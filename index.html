@@ -3,60 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二郎神闯关传</title>
+    <title>二郎神RPG</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <div class="game-header">
-            <div class="player-info">
-                <span class="player-name">二郎神 · 杨戬</span>
-                <div class="health-bar">
-                    <div class="health-fill" id="health"></div>
+            <div class="player-stats">
+                <div class="stat-row">
+                    <span class="stat-icon">❤️</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill hp" id="hpBar"></div>
+                    </div>
+                    <span class="stat-value" id="hpText">100/100</span>
                 </div>
-                <span class="health-text" id="healthText">100/100</span>
+                <div class="stat-row">
+                    <span class="stat-icon">⭐</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill exp" id="expBar"></div>
+                    </div>
+                    <span class="stat-value" id="expText">0/100</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-icon">⚡</span>
+                    <div class="stat-bar">
+                        <div class="stat-fill mp" id="mpBar"></div>
+                    </div>
+                    <span class="stat-value" id="mpText">50/50</span>
+                </div>
             </div>
-            <div class="game-title">二郎神闯关传</div>
-            <div class="level-info">
-                <span class="level-label">关卡</span>
-                <span class="level-value" id="level">1</span>
+            <div class="game-title">二郎神RPG</div>
+            <div class="player-info">
+                <div class="level-badge">等级 <span id="level">1</span></div>
+                <div class="gold-display">💰 <span id="gold">0</span></div>
             </div>
         </div>
         
-        <canvas id="gameCanvas" width="900" height="500"></canvas>
+        <div class="game-area">
+            <canvas id="gameCanvas" width="700" height="450"></canvas>
+            <div class="battle-overlay" id="battleOverlay">
+                <div class="battle-scene">
+                    <div class="enemy-display" id="enemyDisplay">
+                        <div class="enemy-sprite" id="enemySprite"></div>
+                        <div class="enemy-name" id="enemyName">妖怪</div>
+                        <div class="enemy-hp-bar">
+                            <div class="enemy-hp-fill" id="enemyHpBar"></div>
+                        </div>
+                        <span class="enemy-hp-text" id="enemyHpText">100/100</span>
+                    </div>
+                    <div class="battle-ui">
+                        <div class="player-battle-sprite" id="playerBattleSprite">🦅</div>
+                    </div>
+                </div>
+                <div class="battle-menu" id="battleMenu">
+                    <div class="battle-actions">
+                        <button class="battle-btn attack-btn" data-action="attack">攻击</button>
+                        <button class="battle-btn skill-btn" data-action="skill">神通</button>
+                        <button class="battle-btn defend-btn" data-action="defend">防御</button>
+                        <button class="battle-btn item-btn" data-action="item">道具</button>
+                    </div>
+                    <div class="skill-panel" id="skillPanel" style="display:none;">
+                        <button class="skill-btn-item" data-skill="eye">👁️ 天眼 (10MP)</button>
+                        <button class="skill-btn-item" data-skill="transform">🐉 八九玄功 (20MP)</button>
+                        <button class="skill-btn-item" data-skill="summon">🐕 哮天犬 (25MP)</button>
+                        <button class="back-btn" onclick="hideSkillPanel()">返回</button>
+                    </div>
+                    <div class="message-box" id="battleMessage">选择一个行动</div>
+                </div>
+            </div>
+        </div>
         
         <div class="game-footer">
-            <div class="controls">
-                <h3>操作说明</h3>
-                <p>← → 移动</p>
-                <p>↑ 跳跃 / 腾云</p>
-                <p>J 三尖两刃刀</p>
-                <p>K 天眼</p>
-                <p>L 八九玄功</p>
-                <p>空格 召唤啸天犬</p>
+            <div class="mini-map" id="miniMap">
+                <canvas id="mapCanvas" width="150" height="100"></canvas>
             </div>
-            <div class="game-status" id="gameStatus">准备战斗!</div>
-            <div class="skills">
-                <div class="skill" id="skillEye">
-                    <span class="skill-icon">👁️</span>
-                    <span class="skill-name">天眼</span>
-                    <span class="skill-cooldown" id="cooldownEye">0</span>
-                </div>
-                <div class="skill" id="skillTransform">
-                    <span class="skill-icon">🐉</span>
-                    <span class="skill-name">八九玄功</span>
-                    <span class="skill-cooldown" id="cooldownTransform">0</span>
-                </div>
-                <div class="skill" id="skillDog">
-                    <span class="skill-icon">🐕</span>
-                    <span class="skill-name">啸天犬</span>
-                    <span class="skill-cooldown" id="cooldownDog">0</span>
+            <div class="controls-hint">
+                <p>🎮 方向键/WASD 移动</p>
+                <p>⚔️ 靠近敌人自动进入战斗</p>
+                <p>📦 靠近商店/传送点交互</p>
+            </div>
+            <div class="inventory">
+                <div class="inv-title">背包</div>
+                <div class="inv-items" id="invItems">
+                    <div class="inv-item">🧪 生命药水 x3</div>
+                    <div class="inv-item">💎 灵石 x5</div>
                 </div>
             </div>
         </div>
-        
-        <button id="restartBtn" class="restart-btn">重新开始</button>
-        <button id="nextLevelBtn" class="next-level-btn">下一关</button>
     </div>
     
     <script src="game.js"></script>
