@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>像素风机甲对战</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="player-info player1">
+                <span class="player-name">机甲战士-红</span>
+                <div class="health-bar">
+                    <div class="health-fill" id="health1"></div>
+                </div>
+                <span class="health-text" id="healthText1">100/100</span>
+            </div>
+            <div class="game-title">MECHA ARENA</div>
+            <div class="player-info player2">
+                <span class="player-name">机甲战士-蓝</span>
+                <div class="health-bar">
+                    <div class="health-fill" id="health2"></div>
+                </div>
+                <span class="health-text" id="healthText2">100/100</span>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        
+        <div class="game-footer">
+            <div class="controls player1-controls">
+                <h3>玩家 1 (红)</h3>
+                <p>↑↓←→ 移动</p>
+                <p>J 攻击</p>
+                <p>K 防御</p>
+            </div>
+            <div class="game-status" id="gameStatus">准备战斗!</div>
+            <div class="controls player2-controls">
+                <h3>玩家 2 (蓝)</h3>
+                <p>WASD 移动</p>
+                <p>F 攻击</p>
+                <p>G 防御</p>
+            </div>
+        </div>
+        
+        <button id="restartBtn" class="restart-btn">重新开始</button>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
